@@ -14,10 +14,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <link rel="icon" type="icon/png" href="images/logo.png">
 
-    <!-- html2canvas for download -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
-    </script>
-
     <style>
         /* ===== RESET & BASE ===== */
         * {
@@ -1805,12 +1801,13 @@
             }, 3200);
 
             // ============================================
-            // 2. AUDIO (Web Audio API ambient background)
+            // 2. AUDIO – Previous ambient pad (restored)
             // ============================================
             let audioCtx = null;
             let audioNodes = [];
             let isAudioPlaying = false;
             let isAudioMuted = false;
+            let timeoutId = null;
 
             function initAudio() {
                 try {
@@ -1834,17 +1831,19 @@
 
             function createPadSound() {
                 if (!audioCtx) return;
+                // Clean up old nodes
                 audioNodes.forEach(n => {
                     try { n.stop && n.stop();
                         n.disconnect && n.disconnect(); } catch (e) {}
                 });
                 audioNodes = [];
 
+                // Gentle chord progression: C - G - Am - F
                 const chords = [
-                    [261.63, 329.63, 392.00],
-                    [196.00, 246.94, 293.66, 392.00],
-                    [220.00, 261.63, 329.63],
-                    [174.61, 220.00, 261.63, 349.23]
+                    [261.63, 329.63, 392.00], // C
+                    [196.00, 246.94, 293.66, 392.00], // G
+                    [220.00, 261.63, 329.63], // Am
+                    [174.61, 220.00, 261.63, 349.23] // F
                 ];
 
                 let chordIndex = 0;
@@ -1864,6 +1863,7 @@
                         gain.gain.exponentialRampToValueAtTime(0.025, now + duration * 0.4);
                         gain.gain.exponentialRampToValueAtTime(0.008, now + duration);
 
+                        // Add a touch of triangle for warmth
                         const osc2 = audioCtx.createOscillator();
                         const gain2 = audioCtx.createGain();
                         osc2.type = 'triangle';
@@ -1886,11 +1886,13 @@
                     });
 
                     chordIndex++;
+                    // Schedule next chord
                     const nextTime = (duration * 0.9) * 1000;
-                    setTimeout(() => {
+                    timeoutId = setTimeout(() => {
                         if (!isAudioMuted && isAudioPlaying) {
                             playChord();
                         } else if (!isAudioMuted) {
+                            // If not playing but not muted, start
                             if (!isAudioPlaying) {
                                 isAudioPlaying = true;
                                 playChord();
@@ -1899,6 +1901,7 @@
                     }, nextTime);
                 }
 
+                // Start
                 if (!isAudioMuted) {
                     isAudioPlaying = true;
                     playChord();
@@ -1914,6 +1917,7 @@
                 musicToggle.addEventListener('click', function(e) {
                     e.stopPropagation();
                     if (isAudioMuted) {
+                        // Unmute
                         isAudioMuted = false;
                         isAudioPlaying = true;
                         musicToggle.classList.remove('muted');
@@ -1926,15 +1930,22 @@
                             createPadSound();
                         }
                     } else {
+                        // Mute
                         isAudioMuted = true;
                         isAudioPlaying = false;
                         musicToggle.classList.add('muted');
                         musicToggle.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                        // Silence all nodes and clear timeout
+                        if (timeoutId) {
+                            clearTimeout(timeoutId);
+                            timeoutId = null;
+                        }
                         audioNodes.forEach(n => {
                             try { n.stop && n.stop();
                                 n.disconnect && n.disconnect(); } catch (e) {}
                         });
                         audioNodes = [];
+                        // Also try to suspend context
                         if (audioCtx && audioCtx.state === 'running') {
                             audioCtx.suspend().catch(() => {});
                         }
@@ -2052,61 +2063,31 @@
             }
 
             // ============================================
-            // 8. DOWNLOAD INVITATION (html2canvas)
+            // 8. DOWNLOAD BUTTON – downloads static image
             // ============================================
             function initDownload() {
                 const btn = document.getElementById('downloadBtn');
-                const captureArea = document.getElementById('capture-area');
 
                 btn.addEventListener('click', function() {
                     if (btn.classList.contains('loading')) return;
 
                     btn.classList.add('loading');
                     const originalText = btn.querySelector('.btn-text').textContent;
-                    btn.querySelector('.btn-text').textContent = 'Generating...';
+                    btn.querySelector('.btn-text').textContent = 'Downloading...';
 
-                    // Use html2canvas to capture the entire capture area
-                    html2canvas(captureArea, {
-                        scale: 1.8,
-                        useCORS: true,
-                        allowTaint: true,
-                        backgroundColor: '#fdf6ed',
-                        logging: false,
-                        width: captureArea.scrollWidth,
-                        height: captureArea.scrollHeight,
-                        windowWidth: captureArea.scrollWidth,
-                        windowHeight: captureArea.scrollHeight,
-                        onclone: function(document) {
-                            // Ensure all images are loaded
-                            const imgs = document.querySelectorAll('img');
-                            return Promise.all(Array.from(imgs).map(img => {
-                                if (img.complete) return Promise.resolve();
-                                return new Promise((resolve) => {
-                                    img.onload = resolve;
-                                    img.onerror = resolve;
-                                    setTimeout(resolve, 3000);
-                                });
-                            }));
-                        }
-                    }).then(canvas =>  {
-                        // Create download link
-                        const link = document.createElement('a');
-                        link.download = 'jesie_eloida.jpg';
-                        link.href = canvas.toDataURL('image/jpeg', 0.92);
-                        link.click();
-                        btn.classList.remove('loading');
-                        btn.querySelector('.btn-text').textContent = 'Downloaded!';
-                        setTimeout(() => {
-                            btn.querySelector('.btn-text').textContent = originalText;
-                        }, 3000);
-                    }).catch(err => {
-                        console.error('Download error:', err);
-                        btn.classList.remove('loading');
-                        btn.querySelector('.btn-text').textContent = 'Try Again';
-                        setTimeout(() => {
-                            btn.querySelector('.btn-text').textContent = originalText;
-                        }, 3000);
-                    });
+                    // Direct download of the pre-existing image
+                    const link = document.createElement('a');
+                    link.href = 'images/jessie_eloida_inv.jpg';
+                    link.download = 'jessie_eloida_inv.jpg';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    btn.classList.remove('loading');
+                    btn.querySelector('.btn-text').textContent = 'Downloaded!';
+                    setTimeout(() => {
+                        btn.querySelector('.btn-text').textContent = originalText;
+                    }, 3000);
                 });
             }
 
