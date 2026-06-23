@@ -1011,6 +1011,36 @@
             opacity: 0.4;
         }
 
+        /* ===== CREDIT LINK ===== */
+        .credit-link {
+            display: inline-block;
+            margin-top: 10px;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.65rem;
+            letter-spacing: 1px;
+            text-transform: none;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            font-weight: 300;
+        }
+        .credit-link i {
+            margin: 0 4px;
+            color: var(--gold-light);
+            opacity: 0.4;
+            transition: opacity 0.3s ease;
+        }
+        .credit-link:hover {
+            color: var(--gold-light);
+        }
+        .credit-link:hover i {
+            opacity: 0.8;
+        }
+        .credit-link strong {
+            font-weight: 500;
+            color: var(--gold-light);
+            opacity: 0.6;
+        }
+
         /* ===== MUSIC TOGGLE ===== */
         .music-toggle {
             position: fixed;
@@ -1510,13 +1540,13 @@
                     </div>
                 </div>
 
-                <!--BestMan & Maid of Honor -->
+                <!-- Best Man & Maid of Honor -->
                 <div class="entourage-category reveal reveal-delay-2">
                     <h4><i class="fas fa-user-friends"></i> Best Man & Maid of Honor</h4>
                     <div class="sub-label"><i class="fas fa-handshake"></i> To assist us in our needs</div>
                     <div class="entourage-grid">
-                        <span > Mr. William Camus</span>
-                        <span > Ms. Eloisa Feleo</span>
+                        <span class="name-tag"><i class="fas fa-user-tie"></i> Mr. William Camus</span>
+                        <span class="name-tag"><i class="fas fa-user-dress"></i> Ms. Eloisa Feleo</span>
                     </div>
                 </div>
 
@@ -1578,11 +1608,11 @@
                         <div class="role"><i class="fas fa-user-dress"></i> Bridesmaids</div>
                         <div class="desc">To stand by us as sisters and confidantes</div>
                         <div class="names">
-                        <span > Ms. Jaycel San Pedro</span>
-                        <span > Ms. Coleen Mactal</span>
-                        <span > Ms. Chariz Damian</span>
-                        <span > Ms. Joyce Ann Mactal</span>
-                        <span > Ms. Aprilyn Madrid</span>
+                            <span>Ms. Jaycel San Pedro</span>
+                            <span>Ms. Coleen Mactal</span>
+                            <span>Ms. Chariz Damian</span>
+                            <span>Ms. Joyce Ann Mactal</span>
+                            <span>Ms. Aprilyn Madrid</span>
                         </div>
                     </div>
 
@@ -1740,6 +1770,10 @@
             Made with <i class="fas fa-heart"></i> for Jessie &amp; Eloida
             <br />
             <span style="font-size:0.6rem;opacity:0.3;">27 June 2026</span>
+            <br />
+            <a href="https://rjge.vercel.app/" target="_blank" class="credit-link">
+                <i class="fas fa-code"></i> crafted by <strong>ROM</strong> <i class="fas fa-code"></i> </i>
+            </a>
         </footer>
 
     </div>
